@@ -1,0 +1,16 @@
+project_id = "fundacion-meriggi"
+
+[functions.resolve-login]
+verify_jwt = false
+
+[functions.activate-invitation]
+verify_jwt = false
+
+[functions.create-invitation]
+verify_jwt = true
+
+[functions.send-communication]
+verify_jwt = true
+
+[functions.send-reminders]
+verify_jwt = false

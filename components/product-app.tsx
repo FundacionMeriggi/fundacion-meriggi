@@ -26,28 +26,42 @@ export function ProductApp() {
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<View>('inicio');
   const [toast, setToast] = useState('');
+  const [fatalError, setFatalError] = useState('');
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     async function load() {
-      const supabase = getSupabase();
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) { router.replace(appPath('/login/')); return; }
-      const found = await getCurrentIdentity();
-      if (!found) {
-        await supabase.auth.signOut();
-        router.replace(appPath('/login/'));
-        return;
+      setLoading(true);
+      setFatalError('');
+      try {
+        const supabase = getSupabase();
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError) throw sessionError;
+        if (!session) { router.replace(appPath('/login/')); return; }
+        const found = await getCurrentIdentity();
+        if (!found) {
+          await supabase.auth.signOut();
+          router.replace(appPath('/login/'));
+          return;
+        }
+        setIdentity(found);
+        setView(found.kind === 'patient' ? 'portal' : 'inicio');
+      } catch {
+        setFatalError('No pudimos conectar con la información de tu cuenta. Revisá tu conexión e intentá nuevamente.');
+      } finally {
+        setLoading(false);
       }
-      setIdentity(found);
-      setView(found.kind === 'patient' ? 'portal' : 'inicio');
-      setLoading(false);
     }
     load();
-    const { data: listener } = getSupabase().auth.onAuthStateChange((event) => {
-      if (event === 'SIGNED_OUT') router.replace(appPath('/login/'));
-    });
-    return () => listener.subscription.unsubscribe();
-  }, [router]);
+    try {
+      const { data: listener } = getSupabase().auth.onAuthStateChange((event) => {
+        if (event === 'SIGNED_OUT') router.replace(appPath('/login/'));
+      });
+      return () => listener.subscription.unsubscribe();
+    } catch {
+      return undefined;
+    }
+  }, [router, reloadKey]);
 
   function notify(text: string) {
     setToast(text);
@@ -82,7 +96,18 @@ export function ProductApp() {
     return base;
   }, [identity]);
 
-  if (loading || !identity) return <Loader />;
+  if (loading) return <Loader />;
+  if (fatalError || !identity) return <main className="connection-page">
+    <article className="connection-card">
+      <span className="eyebrow">Conexión segura</span>
+      <h1>No pudimos abrir tu espacio</h1>
+      <p>{fatalError || 'No encontramos una cuenta activa vinculada a este acceso.'}</p>
+      <div className="actions">
+        <button className="btn primary" onClick={() => setReloadKey((value) => value + 1)}>Volver a intentar</button>
+        <button className="btn" onClick={() => router.replace(appPath('/login/'))}>Ir al ingreso</button>
+      </div>
+    </article>
+  </main>;
   const displayName = identity.kind === 'staff' ? identity.member.full_name : `${identity.patient.first_name} ${identity.patient.last_name}`;
   const role = identity.kind === 'staff' ? ROLE_LABELS[identity.member.role] : 'Paciente';
   const initials = displayName.split(' ').slice(0,2).map(x=>x[0]).join('').toUpperCase();

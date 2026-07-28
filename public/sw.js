@@ -1,5 +1,5 @@
 const BASE = self.location.pathname.replace(/\/sw\.js$/, '');
-const CACHE = 'meriggi-static-v1';
+const CACHE = 'meriggi-static-v2';
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll([`${BASE}/logo-meriggi.jpg`, `${BASE}/manifest.webmanifest`])).catch(() => undefined));
   self.skipWaiting();
@@ -11,10 +11,10 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
   if (event.request.method !== 'GET' || url.origin !== self.location.origin) return;
-  const isStatic = url.pathname.includes('/_next/static/') || /\.(?:png|jpg|jpeg|svg|webp|ico|woff2|css|js)$/.test(url.pathname);
-  if (!isStatic) return;
-  event.respondWith(caches.match(event.request).then((cached) => cached || fetch(event.request).then((response) => {
+  const isBrandAsset = /\.(?:png|jpg|jpeg|svg|webp|ico|woff2)$/.test(url.pathname);
+  if (!isBrandAsset) return;
+  event.respondWith(fetch(event.request).then((response) => {
     if (response.ok) caches.open(CACHE).then((cache) => cache.put(event.request, response.clone()));
     return response;
-  })));
+  }).catch(() => caches.match(event.request)));
 });

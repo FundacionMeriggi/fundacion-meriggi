@@ -33,7 +33,11 @@ export default function ActivatePage() {
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'No se pudo activar la cuenta.');
-      setMessage(`Cuenta activada. Tu usuario es ${data.username}. Ya podés ingresar.`);
+      setMessage(
+        data.recreated
+          ? `Cuenta recreada correctamente. Tu usuario es ${data.username}. Ya podés ingresar.`
+          : `Cuenta activada. Tu usuario es ${data.username}. Ya podés ingresar.`,
+      );
       setPassword(''); setRepeat('');
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'No se pudo activar la cuenta.');

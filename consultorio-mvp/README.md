@@ -1,33 +1,30 @@
-# Fundación Meriggi — Gestión clínica
+# Fundación Meriggi — Sistema de gestión clínica
 
-Aplicación para una institución de salud mental y adicciones, con identidad visual basada en el logo de Fundación Meriggi.
+Aplicación web interna para la **Fundación Meriggi**, orientada a la gestión de salud mental y adicciones.
 
-## Demo inmediata
+## Funciones incluidas en el prototipo
 
-Abrir `fundacion-meriggi.html` con Chrome. Es una demo autocontenida que funciona sin instalación y guarda los cambios en el navegador mediante `localStorage`.
+- Panel general de actividad.
+- Agenda diaria y gestión de turnos.
+- Registro y búsqueda de pacientes.
+- Ficha de paciente e historia de evoluciones.
+- Gestión de profesionales y personal administrativo.
+- Roles previstos: administrador, profesional y recepción.
+- Configuración institucional y reglas de notificación.
+- Confirmaciones y recordatorios por correo mediante Resend.
+- Exportación e importación de respaldos locales.
+- Esquema PostgreSQL/Supabase con políticas RLS y auditoría.
+- Diseño responsive con identidad visual de Fundación Meriggi.
 
-Funciones disponibles en la demo:
+## Estado del proyecto
 
-- Panel institucional.
-- Agenda y gestión de turnos.
-- Alta de pacientes.
-- Fichas, responsables y consentimiento.
-- Evoluciones clínicas confidenciales.
-- Alta y activación de integrantes del staff.
-- Roles: administrador clínico, profesional y recepción.
-- Preferencias de correo por integrante.
-- Confirmaciones y recordatorios para pacientes.
-- Resumen de próximos pacientes para el staff.
-- Historial de comunicaciones.
-- Configuración editable de la fundación.
-- Exportación e importación de respaldos JSON.
-- Diseño responsive con colores y logo de Fundación Meriggi.
+La interfaz funciona actualmente como **MVP con datos ficticios y persistencia local en el navegador**. No debe utilizarse todavía con datos clínicos reales.
 
-La demo registra los correos como **simulados**. No almacena datos en un servidor y no debe utilizarse para historias clínicas reales.
+Para producción faltan conectar Supabase Auth y las consultas reales, configurar el envío de correos, automatizar recordatorios, probar permisos, backups y realizar una revisión técnica y legal.
 
-## Proyecto Next.js
+## Ejecución local
 
-El código fuente incluye una aplicación Next.js/TypeScript y una ruta de servidor para enviar correos con Resend.
+Requisitos: Node.js 20.9 o superior.
 
 ```bash
 npm install
@@ -36,44 +33,87 @@ npm run dev
 
 Abrir `http://localhost:3000`.
 
-### Activar envío real de correos
+## Variables de entorno
 
-1. Crear una cuenta en Resend.
-2. Verificar el dominio desde el que se enviarán los mensajes.
-3. Copiar `.env.example` como `.env.local`.
-4. Completar:
+Copiar `.env.example` como `.env.local` y completar:
 
 ```env
-RESEND_API_KEY=re_xxxxxxxxx
-EMAIL_FROM=Fundación Meriggi <turnos@tudominio.com>
+RESEND_API_KEY=
+EMAIL_FROM=
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
 ```
 
-Sin estas variables, la aplicación conserva las comunicaciones en modo simulado.
+Nunca subir `.env.local`, contraseñas ni claves privadas al repositorio.
 
-## Base de datos y usuarios
+## Base de datos
 
-Para uso real se recomienda Supabase:
+Las migraciones iniciales están en:
 
-1. Crear un proyecto Supabase.
-2. Ejecutar `supabase/migrations/001_initial_schema.sql`.
-3. Ejecutar `supabase/migrations/002_meriggi_features.sql`.
-4. Conectar Supabase Auth y reemplazar el almacenamiento local por consultas al servidor.
-5. Crear al primer usuario como `admin`.
+- `supabase/migrations/001_initial_schema.sql`
+- `supabase/migrations/002_meriggi_features.sql`
 
-El esquema incluye:
+Deben ejecutarse en orden desde el SQL Editor de Supabase.
 
-- Institución.
-- Staff y roles.
-- Profesionales.
-- Pacientes y responsables.
-- Turnos.
-- Evoluciones clínicas sin borrado físico.
-- Documentos.
-- Consentimientos.
-- Comunicaciones y preferencias de notificación.
-- Auditoría.
-- Row Level Security.
+## Seguridad clínica
 
-## Estado de la entrega
+Antes de cargar pacientes reales, revisar y completar `docs/production-checklist.md`.
 
-La interfaz, los flujos y el código de correo están implementados. Para publicarla y utilizar datos reales todavía hay que aportar y configurar cuentas externas: dominio, Supabase, Resend y hosting. También corresponde realizar pruebas de seguridad, backups y validación legal/profesional antes del uso clínico.
+El sistema de producción debe garantizar confidencialidad, acceso autorizado, integridad, disponibilidad, trazabilidad, backups y separación efectiva entre información administrativa y clínica.
+
+## Actualización: usuarios, claves y roles
+
+La versión actual incorpora dos niveles de implementación:
+
+### Demo publicada en GitHub Pages
+
+El archivo `fundacion-meriggi.html` incluye un acceso local por usuario y contraseña, panel de usuarios y vistas diferenciadas por rol:
+
+- **Administrador:** control completo, creación de usuarios, cambio de roles y contraseñas.
+- **Secretaría:** agenda, pacientes administrativos y comunicaciones; no puede leer evoluciones clínicas.
+- **Profesional:** agenda propia, pacientes asignados y evoluciones clínicas.
+
+Especialidades disponibles para profesionales:
+
+- Psicólogo
+- Operador de grupo
+- Administrativo
+- Taller
+
+Los accesos demostrativos están indicados en la pantalla de inicio. Este modo usa `localStorage` y es únicamente para pruebas; no debe contener datos clínicos reales.
+
+### Producción con Supabase Auth
+
+Se agregaron:
+
+- Inicio de sesión con nombre de usuario y contraseña.
+- Rutas de servidor para crear usuarios, editar perfiles y restablecer contraseñas.
+- Roles `admin`, `secretary` y `professional`.
+- Especialidades `psychologist`, `group_operator`, `administrative` y `workshop`.
+- Políticas RLS que impiden a secretaría leer evoluciones y archivos clínicos.
+- Migración `003_user_accounts_and_roles.sql`.
+
+Supabase Auth almacena las contraseñas; la aplicación nunca debe guardar contraseñas en tablas propias ni en el navegador en producción.
+
+## Activación de cuentas
+
+La versión actual incluye un flujo donde **cada integrante elige su propia contraseña**:
+
+1. El administrador crea o importa el integrante del staff.
+2. El servidor genera un token de activación de un solo uso, válido por 48 horas.
+3. Si la persona tiene correo, recibe un enlace de activación.
+4. Si no tiene correo —como Cecilia Simari— el administrador entrega el enlace o código personalmente.
+5. La persona crea su contraseña; administración no puede verla ni definirla.
+6. Para recuperar el acceso, el administrador genera una nueva invitación, que invalida la contraseña anterior.
+
+La nómina inicial se encuentra en `data/staff-inicial.json`.
+
+En la demo estática de GitHub Pages, Ignacio puede activar el acceso inicial con:
+
+```text
+Usuario: ignacio.simari
+Código: MERIGGI-IGNACIO
+```
+
+Esta activación estática sirve únicamente para probar la interfaz. Las cuentas compartidas entre dispositivos requieren desplegar la aplicación Next.js y configurar Supabase.

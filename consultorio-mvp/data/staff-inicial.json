@@ -1,0 +1,12 @@
+[
+  {"fullName":"Ignacio Simari","username":"ignacio.simari","email":"cai.simari.ignacio@gmail.com","role":"admin","specialty":"administrative","function":"Administrador total","licenseNumber":null},
+  {"fullName":"Cecilia Simari","username":"cecilia.simari","email":null,"role":"admin","specialty":"psychologist","function":"Psicóloga / Administradora","licenseNumber":null},
+  {"fullName":"Flor Morbelli","username":"flor.morbelli","email":"floor.morbelli@live.com","role":"secretary","specialty":"secretary","function":"Secretaría","licenseNumber":null},
+  {"fullName":"Marcela Alejandra Imar Navarro","username":"marcela.imar","email":"imarmarcela@hotmail.com","role":"professional","specialty":"psychologist","function":"Coordinadora del grupo de parejas","licenseNumber":"MN 75307"},
+  {"fullName":"Milena Belén Castaño","username":"milena.castano","email":"milena_belen@hotmail.com","role":"professional","specialty":"workshop","function":"Taller","licenseNumber":null},
+  {"fullName":"Carolina Rojo Álvarez","username":"carolina.rojo","email":"crojo1986@gmail.com","role":"professional","specialty":"psychologist","function":"Psicóloga","licenseNumber":null},
+  {"fullName":"Alberto Cárdenas","username":"alberto.cardenas","email":"psialbertocardenas@gmail.com","role":"professional","specialty":"psychologist","function":"Psicólogo","licenseNumber":"62155"},
+  {"fullName":"Luis Alberto Pesce","username":"luis.pesce","email":"luisalbertopesce53@gmail.com","role":"professional","specialty":"group_operator","function":"Operador socioterapéutico","licenseNumber":null},
+  {"fullName":"Alejandra Almirón","username":"alejandra.almiron","email":"alejandra.15.1972@gmail.com","role":"professional","specialty":"group_operator","function":"Operadora","licenseNumber":null},
+  {"fullName":"Sofía Bareille","username":"sofia.bareille","email":"lic.bareillesofia@gmail.com","role":"professional","specialty":"psychologist","function":"Psicóloga","licenseNumber":"MN 82799"}
+]

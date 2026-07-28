@@ -44,3 +44,15 @@
 - [ ] Manual de contingencia ante caída del sistema.
 - [ ] Responsable interno de accesos y altas/bajas.
 - [ ] Revisión técnica y legal antes de cargar información real.
+
+## Usuarios y permisos
+
+- [ ] Ejecutar `003_user_accounts_and_roles.sql` después de las migraciones 001 y 002.
+- [ ] Crear el primer usuario administrador desde un entorno seguro.
+- [ ] Comprobar que cada nombre de usuario sea único.
+- [ ] Exigir contraseñas de al menos 12 caracteres para producción.
+- [ ] Activar protección contra contraseñas filtradas y MFA para administradores.
+- [ ] Confirmar que secretaría no puede consultar `clinical_notes` ni `patient_files`.
+- [ ] Confirmar que profesionales solo accedan a los pacientes autorizados.
+- [ ] Registrar creación, cambio de rol, desactivación y restablecimiento de claves en auditoría.
+- [ ] Nunca compartir `SUPABASE_SERVICE_ROLE_KEY` ni incluirla en GitHub.

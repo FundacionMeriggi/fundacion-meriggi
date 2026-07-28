@@ -21,14 +21,16 @@ Deno.serve(async (req) => {
     let invitation = (await db.from('invitations').select('*').eq('token_hash', tokenHash).is('used_at', null).gt('expires_at', new Date().toISOString()).maybeSingle()).data;
     let targetType: 'staff' | 'patient';
     let targetId: string;
+    let isBootstrap = false;
 
     if (!invitation) {
       const bootstrapSecret = Deno.env.get('BOOTSTRAP_SECRET');
       if (!bootstrapSecret || rawToken !== bootstrapSecret) return json({ error: 'El enlace venció, ya fue utilizado o es inválido.' }, 400);
       const ignacio = await db.from('team_members').select('*').eq('username', 'ignacio.simari').maybeSingle();
-      if (!ignacio.data || ignacio.data.auth_user_id) return json({ error: 'La activación inicial ya fue completada.' }, 400);
+      if (!ignacio.data) return json({ error: 'No se encontró la cuenta administradora inicial.' }, 400);
       targetType = 'staff';
       targetId = ignacio.data.id;
+      isBootstrap = true;
     } else {
       targetType = invitation.target_type;
       targetId = invitation.target_id;
@@ -36,7 +38,12 @@ Deno.serve(async (req) => {
 
     const table = targetType === 'staff' ? 'team_members' : 'patients';
     const target = await db.from(table).select('*').eq('id', targetId).single();
-    if (target.error || !target.data || !target.data.active) return json({ error: 'La cuenta no está disponible.' }, 400);
+    if (target.error || !target.data) return json({ error: 'La cuenta no está disponible.' }, 400);
+    if (!target.data.active) {
+      if (!isBootstrap) return json({ error: 'La cuenta no está disponible.' }, 400);
+      const reactivated = await db.from(table).update({ active: true }).eq('id', targetId);
+      if (reactivated.error) return json({ error: 'No se pudo reactivar la cuenta administradora.' }, 400);
+    }
     const username = target.data.username;
     const email = target.data.email || `${username}@accounts.meriggi.invalid`;
     let authUserId = target.data.auth_user_id as string | null;

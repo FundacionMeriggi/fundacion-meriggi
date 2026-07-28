@@ -1,0 +1,23 @@
+name: Recordatorios de turnos
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+jobs:
+  reminders:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Procesar recordatorios pendientes
+        env:
+          SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+          REMINDER_SECRET: ${{ secrets.REMINDER_WEBHOOK_SECRET }}
+        run: |
+          curl --fail-with-body --request POST \
+            "$SUPABASE_URL/functions/v1/send-reminders" \
+            --header "apikey: $SUPABASE_KEY" \
+            --header "x-reminder-secret: $REMINDER_SECRET" \
+            --header "Content-Type: application/json" \
+            --data '{}'

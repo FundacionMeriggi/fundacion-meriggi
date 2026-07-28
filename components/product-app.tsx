@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { BriefcaseBusiness, CalendarDays, Home, LogOut, Mail, Settings, UserRound, Users, UsersRound } from 'lucide-react';
 import { getCurrentIdentity, type CurrentIdentity } from '@/lib/session';
-import { appPath, getSupabase } from '@/lib/supabase';
+import { appPath, assetPath, getSupabase } from '@/lib/supabase';
 import { ROLE_LABELS } from '@/lib/types';
 import { AgendaModule } from './agenda-module';
 import { CommunicationsModule } from './communications-module';
@@ -114,12 +114,12 @@ export function ProductApp() {
 
   return <div className="app-shell">
     <aside className="sidebar">
-      <div className="brand"><Image src={appPath("/logo-meriggi.jpg")} alt="Fundación Meriggi" width={52} height={52}/><div><strong>Fundación Meriggi</strong><small>Gestión clínica</small></div></div>
+      <div className="brand"><Image src={assetPath("/logo-meriggi.jpg")} alt="Fundación Meriggi" width={52} height={52}/><div><strong>Fundación Meriggi</strong><small>Gestión clínica</small></div></div>
       <nav className="nav">{nav.map(item=>{const Icon=item.icon;return <button key={item.id} className={view===item.id?'active':''} onClick={()=>setView(item.id)}><Icon/><span>{item.label}</span></button>})}</nav>
       <div className="user-box"><div className="user-avatar">{initials}</div><div><strong>{displayName}</strong><small>{role}</small></div><button className="icon-btn" onClick={logout} title="Cerrar sesión"><LogOut size={17}/></button></div>
     </aside>
     <main className="content">
-      <div className="mobile-bar"><Image src={appPath("/logo-meriggi.jpg")} alt="Fundación Meriggi" width={40} height={40}/><strong>Meriggi</strong><select value={view} onChange={e=>setView(e.target.value as View)}>{nav.map(n=><option value={n.id} key={n.id}>{n.label}</option>)}</select><button className="icon-btn" onClick={logout}><LogOut size={16}/></button></div>
+      <div className="mobile-bar"><Image src={assetPath("/logo-meriggi.jpg")} alt="Fundación Meriggi" width={40} height={40}/><strong>Meriggi</strong><select value={view} onChange={e=>setView(e.target.value as View)}>{nav.map(n=><option value={n.id} key={n.id}>{n.label}</option>)}</select><button className="icon-btn" onClick={logout}><LogOut size={16}/></button></div>
       {view==='inicio' && <DashboardModule identity={identity} navigate={(v)=>setView(v as View)}/>} 
       {view==='agenda' && <AgendaModule identity={identity} notify={notify}/>} 
       {view==='pacientes' && <PatientsModule identity={identity} notify={notify}/>} 

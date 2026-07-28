@@ -13,7 +13,7 @@ import {
   UserRound,
   UsersRound,
 } from 'lucide-react';
-import { appPath } from '@/lib/supabase';
+import { appPath, assetPath } from '@/lib/supabase';
 
 const roleCards = [
   {
@@ -51,7 +51,7 @@ export default function HomePage() {
     <main className="public-site">
       <header className="site-header">
         <Link className="site-brand" href={appPath('/')} aria-label="Fundación Meriggi, inicio">
-          <Image src={appPath('/logo-meriggi.jpg')} alt="" width={48} height={48} priority />
+          <Image src={assetPath('/logo-meriggi.jpg')} alt="" width={48} height={48} priority />
           <span>
             <strong>Fundación Meriggi</strong>
             <small>Salud mental y acompañamiento</small>
@@ -93,7 +93,7 @@ export default function HomePage() {
           <article className="hero-panel">
             <div className="hero-panel-head">
               <div className="hero-mini-brand">
-                <Image src={appPath('/logo-meriggi.jpg')} alt="" width={42} height={42} />
+                <Image src={assetPath('/logo-meriggi.jpg')} alt="" width={42} height={42} />
                 <div><strong>Mi espacio</strong><small>Fundación Meriggi</small></div>
               </div>
               <span className="status-dot">Conexión segura</span>
@@ -190,7 +190,7 @@ export default function HomePage() {
 
       <footer className="site-footer">
         <div className="site-brand">
-          <Image src={appPath('/logo-meriggi.jpg')} alt="" width={44} height={44} />
+          <Image src={assetPath('/logo-meriggi.jpg')} alt="" width={44} height={44} />
           <span><strong>Fundación Meriggi</strong><small>Asistencia en Salud Mental y Adicciones</small></span>
         </div>
         <p>Un entorno digital para acompañar con continuidad, cuidado y responsabilidad.</p>

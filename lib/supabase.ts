@@ -16,6 +16,10 @@ export function getSupabase(): SupabaseClient {
 }
 
 export function appPath(path: string) {
+  return path;
+}
+
+export function assetPath(path: string) {
   const base = process.env.NEXT_PUBLIC_DEPLOY_TARGET === 'github-pages' ? '/fundacion-meriggi' : '';
   return `${base}${path}`;
 }

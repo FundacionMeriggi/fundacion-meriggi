@@ -1,9 +1,9 @@
 'use client';
 import { useEffect } from 'react';
-import { appPath } from '@/lib/supabase';
+import { assetPath } from '@/lib/supabase';
 export function PwaRegister() {
   useEffect(() => {
-    if ('serviceWorker' in navigator) navigator.serviceWorker.register(appPath('/sw.js')).catch(() => undefined);
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register(assetPath('/sw.js')).catch(() => undefined);
   }, []);
   return null;
 }

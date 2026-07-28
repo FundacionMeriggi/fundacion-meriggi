@@ -26,10 +26,27 @@ Deno.serve(async (req) => {
     if (!invitation) {
       const bootstrapSecret = Deno.env.get('BOOTSTRAP_SECRET');
       if (!bootstrapSecret || rawToken !== bootstrapSecret) return json({ error: 'El enlace venció, ya fue utilizado o es inválido.' }, 400);
-      const ignacio = await db.from('team_members').select('*').eq('username', 'ignacio.simari').maybeSingle();
-      if (!ignacio.data) return json({ error: 'No se encontró la cuenta administradora inicial.' }, 400);
+      const completed = await db.from('audit_log').select('id').eq('action', 'bootstrap_recovery_completed').limit(1).maybeSingle();
+      if (completed.data) return json({ error: 'La recuperación inicial ya fue utilizada.' }, 400);
+
+      let ignacio = (await db.from('team_members').select('*').eq('username', 'ignacio.simari').limit(1).maybeSingle()).data;
+      if (!ignacio) {
+        const repaired = await db.from('team_members').upsert({
+          id: '20000000-0000-4000-8000-000000000001',
+          organization_id: '11111111-1111-4111-8111-111111111111',
+          full_name: 'Ignacio Simari',
+          username: 'ignacio.simari',
+          email: 'cai.simari.ignacio@gmail.com',
+          role: 'super_admin',
+          specialty: 'administrative',
+          job_title: 'Administrador total',
+          active: true,
+        }, { onConflict: 'id' }).select('*').single();
+        if (repaired.error || !repaired.data) return json({ error: 'No se pudo reparar la cuenta administradora inicial.' }, 400);
+        ignacio = repaired.data;
+      }
       targetType = 'staff';
-      targetId = ignacio.data.id;
+      targetId = ignacio.id;
       isBootstrap = true;
     } else {
       targetType = invitation.target_type;
@@ -47,6 +64,13 @@ Deno.serve(async (req) => {
     const username = target.data.username;
     const email = target.data.email || `${username}@accounts.meriggi.invalid`;
     let authUserId = target.data.auth_user_id as string | null;
+    let createdUser = false;
+
+    if (!authUserId && isBootstrap) {
+      const listed = await db.auth.admin.listUsers({ page: 1, perPage: 1000 });
+      const existingUser = listed.data?.users?.find((user) => user.email?.toLowerCase() === email.toLowerCase());
+      if (existingUser) authUserId = existingUser.id;
+    }
 
     if (authUserId) {
       const updated = await db.auth.admin.updateUserById(authUserId, { password: chosenPassword, email_confirm: true, user_metadata: { username, target_type: targetType, target_id: targetId } });
@@ -55,15 +79,20 @@ Deno.serve(async (req) => {
       const created = await db.auth.admin.createUser({ email, password: chosenPassword, email_confirm: true, user_metadata: { username, target_type: targetType, target_id: targetId } });
       if (created.error || !created.data.user) return json({ error: created.error?.message || 'No se pudo crear la cuenta.' }, 400);
       authUserId = created.data.user.id;
-      const linked = await db.from(table).update({ auth_user_id: authUserId }).eq('id', targetId);
-      if (linked.error) {
-        await db.auth.admin.deleteUser(authUserId);
-        return json({ error: 'No se pudo vincular la cuenta.' }, 400);
-      }
+      createdUser = true;
+    }
+
+    const linked = await db.from(table).update({ auth_user_id: authUserId, active: true }).eq('id', targetId);
+    if (linked.error) {
+      if (createdUser) await db.auth.admin.deleteUser(authUserId);
+      return json({ error: 'No se pudo vincular la cuenta.' }, 400);
     }
 
     if (invitation) await db.from('invitations').update({ used_at: new Date().toISOString() }).eq('id', invitation.id);
     await db.from('audit_log').insert({ actor_user_id: authUserId, actor_name: targetType === 'staff' ? target.data.full_name : `${target.data.first_name} ${target.data.last_name}`, action: 'account_activated', table_name: table, record_id: targetId });
+    if (isBootstrap) {
+      await db.from('audit_log').insert({ actor_user_id: authUserId, actor_name: target.data.full_name, action: 'bootstrap_recovery_completed', table_name: table, record_id: targetId });
+    }
     return json({ ok: true, username });
   } catch (error) {
     console.error(error);

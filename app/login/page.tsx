@@ -14,9 +14,14 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    getSupabase().auth.getSession().then(({ data }) => {
-      if (data.session) router.replace(appPath('/panel/'));
-    });
+    try {
+      getSupabase().auth.getSession().then(({ data, error: sessionError }) => {
+        if (sessionError) setError('No pudimos verificar tu sesión. Revisá tu conexión e intentá nuevamente.');
+        if (data.session) router.replace(appPath('/panel/'));
+      });
+    } catch {
+      setError('El acceso seguro todavía no está configurado.');
+    }
   }, [router]);
 
   async function submit(event: FormEvent) {
@@ -49,7 +54,7 @@ export default function LoginPage() {
           }
           email = resolved.email;
         } catch {
-          throw new Error('Ingresá con tu correo electrónico para acceder.');
+          throw new Error('No pudimos validar ese usuario. También podés ingresar con tu correo.');
         }
       }
 
@@ -68,13 +73,16 @@ export default function LoginPage() {
       <form className="auth-card" onSubmit={submit}>
         <span className="eyebrow">Acceso seguro</span>
         <h2>Ingresar</h2>
-        <p>Usá tu correo electrónico y tu contraseña personal.</p>
-        <label>Correo electrónico
+        <p>Usá tu nombre de usuario o correo y tu contraseña personal.</p>
+        <label>Usuario o correo electrónico
           <input
-            type="email"
+            type="text"
             value={identifier}
             onChange={(e) => setIdentifier(e.target.value)}
             autoComplete="username"
+            placeholder="nombre.apellido o correo@ejemplo.com"
+            spellCheck={false}
+            autoCapitalize="none"
             required
           />
         </label>
@@ -92,6 +100,7 @@ export default function LoginPage() {
           {loading ? 'Ingresando…' : 'Ingresar'}
         </button>
         <div className="auth-links">
+          <Link href={appPath('/')}>Volver al sitio</Link>
           <Link href={appPath('/activar/')}>Activar cuenta</Link>
           <Link href={appPath('/recuperar/')}>Olvidé mi contraseña</Link>
         </div>

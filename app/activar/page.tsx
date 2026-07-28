@@ -3,7 +3,7 @@
 import { FormEvent, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { AuthFrame } from '@/components/auth-frame';
-import { appPath } from '@/lib/supabase';
+import { appPath, hasSupabaseConfig } from '@/lib/supabase';
 
 export default function ActivatePage() {
   const [token, setToken] = useState('');
@@ -23,6 +23,7 @@ export default function ActivatePage() {
     setError(''); setMessage('');
     if (password.length < 10) return setError('La contraseña debe tener al menos 10 caracteres.');
     if (password !== repeat) return setError('Las contraseñas no coinciden.');
+    if (!hasSupabaseConfig()) return setError('La conexión segura todavía no está configurada.');
     setLoading(true);
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/activate-invitation`, {

@@ -4,6 +4,7 @@ Producto web de uso interno y portal de pacientes para Fundación Meriggi. Reemp
 
 ## Incluido
 
+- Sitio público institucional en la portada, separado de la aplicación privada.
 - Autenticación con usuario o correo y contraseña personal.
 - Invitaciones de un solo uso para que cada integrante elija su contraseña.
 - Administrador total, administradora/profesional, Secretaría, profesionales y pacientes.
@@ -19,6 +20,16 @@ Producto web de uso interno y portal de pacientes para Fundación Meriggi. Reemp
 - Base privada de documentos.
 - Publicación automática en GitHub Pages.
 - Backend en Supabase con políticas RLS y funciones seguras.
+
+## Desarrollo local
+
+1. Copiar `.env.example` como `.env.local`.
+2. Completar la URL y la publishable key del proyecto de Supabase.
+3. Ejecutar `npm install`.
+4. Ejecutar `npm run dev`.
+
+La portada pública funciona sin una sesión. El ingreso, la activación, la
+recuperación y los paneles privados requieren la conexión con Supabase.
 
 ## Staff precargado
 

@@ -10,6 +10,7 @@ const nextConfig = {
   assetPrefix: githubPages ? repoBase : '',
   poweredByHeader: false,
   reactStrictMode: true,
+  turbopack: { root: process.cwd() },
 };
 
 export default nextConfig;
